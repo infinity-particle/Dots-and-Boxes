@@ -13,12 +13,10 @@ import javafx.scene.text.Text;
 
 public class MenuItem extends StackPane {
   public MenuItem(String name) {
-    Rectangle background = new Rectangle(300, 24);
-
     Stop[] stops = new Stop[] {new Stop(0, Color.BLACK), new Stop(0.2, Color.DARKCYAN)};
     LinearGradient gradient = new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, stops);
 
-
+    Rectangle background = new Rectangle(300, 24);
     background.setOpacity(0.4);
     background.setFill(gradient);
     background.setVisible(false);
