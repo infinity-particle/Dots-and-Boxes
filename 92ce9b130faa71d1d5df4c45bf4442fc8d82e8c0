@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "baa041b7_64903744",
+        "filename": "Lab/sample/Bot.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1007635
+      },
+      "writtenOn": "2016-04-20T19:03:19Z",
+      "side": 1,
+      "message": "makes a random move",
+      "revId": "92ce9b130faa71d1d5df4c45bf4442fc8d82e8c0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "baa041b7_e496874b",
+        "filename": "Lab/sample/Box.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1007635
+      },
+      "writtenOn": "2016-04-20T19:03:19Z",
+      "side": 1,
+      "message": "Hmmm...\nWhy null?",
+      "revId": "92ce9b130faa71d1d5df4c45bf4442fc8d82e8c0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "baa041b7_a4c99f7a",
+        "filename": "Lab/sample/Constants.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1007635
+      },
+      "writtenOn": "2016-04-20T19:03:19Z",
+      "side": 1,
+      "message": "Such a looooong names :(",
+      "range": {
+        "startLine": 8,
+        "startChar": 10,
+        "endLine": 8,
+        "endChar": 40
+      },
+      "revId": "92ce9b130faa71d1d5df4c45bf4442fc8d82e8c0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "baa041b7_e4cfa77d",
+        "filename": "Lab/sample/NewGameWindow.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1007635
+      },
+      "writtenOn": "2016-04-20T19:03:19Z",
+      "side": 1,
+      "message": "What do you try to do? This looks not good to me.",
+      "revId": "92ce9b130faa71d1d5df4c45bf4442fc8d82e8c0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
