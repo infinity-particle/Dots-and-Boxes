@@ -1,9 +1,11 @@
 package sample;
 
+import java.io.Serializable;
+
 /**
  * This class implements the game options.
  */
-public class Options {
+public class Options implements Serializable {
   private Player firstPlayer;
   private Player secondPlayer;
   private int rows;

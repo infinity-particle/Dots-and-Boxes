@@ -13,6 +13,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 /**
@@ -20,7 +21,7 @@ import java.util.Vector;
  */
 public class Game implements Constants {
   private static Vector<Text> playersNames;
-  private static Vector<Text> scores;
+  private static ArrayList<Text> scores;
   private static Vector<Player> players;
   private static Board gameBoard;
   private Options gameOptions;
@@ -28,6 +29,7 @@ public class Game implements Constants {
 
   Game(Options gameOptions) {
     this.gameOptions = gameOptions;
+    File.saveOptions("replay", gameOptions);
 
     players = new Vector<>();
     players.add(gameOptions.getFirstPlayer());
@@ -35,7 +37,7 @@ public class Game implements Constants {
 
     gameBoard = new Board(gameOptions.getRows(), gameOptions.getColumns());
     currentPlayer = 0;
-    scores = new Vector<>();
+    scores = new ArrayList<>();
     playersNames = new Vector<>();
 
     Scene gameScene = createScene();
@@ -135,6 +137,10 @@ public class Game implements Constants {
     return players.get(currentPlayer);
   }
 
+  public static int getNumberOfTheCurrentPlayer() {
+    return currentPlayer;
+  }
+
   public static void addScoreToPlayer() {
     players.get(currentPlayer).addScore(1);
     scores.get(currentPlayer).setText(Integer.toString(players.get(currentPlayer).getScore()));
@@ -142,5 +148,13 @@ public class Game implements Constants {
 
   public static Vector<Player> getPlayers() {
     return players;
+  }
+
+  public Options getGameOptions() {
+    return gameOptions;
+  }
+
+  public static ArrayList<Text> getScores() {
+    return scores;
   }
 }

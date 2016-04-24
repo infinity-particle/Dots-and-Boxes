@@ -1,11 +1,13 @@
 package sample;
 
+import java.io.Serializable;
+
 import static java.lang.Math.*;
 
 /**
  * Implements point with x and y coordinates.
  */
-public class Point {
+public class Point implements Serializable {
   private int x;
   private int y;
 

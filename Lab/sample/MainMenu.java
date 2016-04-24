@@ -5,6 +5,9 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
+
+import java.io.File;
 
 public class MainMenu extends Pane implements Constants {
   private static Scene mainMenuScene;
@@ -13,6 +16,7 @@ public class MainMenu extends Pane implements Constants {
     setPrefSize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
 
     MenuItem newGameButton = new MenuItem("NEW GAME");
+    MenuItem replayButton = new MenuItem("REPLAY");
     MenuItem exitButton = new MenuItem("EXIT");
 
     newGameButton.setOnMouseReleased(event -> {
@@ -21,9 +25,15 @@ public class MainMenu extends Pane implements Constants {
       if (gameOptions != null)
         game = new Game(gameOptions);
     });
+    replayButton.setOnMouseClicked(event -> {
+      FileChooser replayFileChooser = new FileChooser();
+      java.io.File file = replayFileChooser.showOpenDialog(Main.getPrimaryStage());
+      if (file != null)
+        new Replay();
+    });
     exitButton.setOnMouseClicked(event -> System.exit(0));
 
-    MenuBox menu = new MenuBox("DOTS & BOXES", newGameButton, exitButton);
+    MenuBox menu = new MenuBox("DOTS & BOXES", newGameButton, replayButton, exitButton);
 
     getChildren().addAll(menu);
 
