@@ -13,6 +13,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Vector;
 
 /**
@@ -20,7 +23,7 @@ import java.util.Vector;
  */
 public class Game implements Constants {
   private static Vector<Text> playersNames;
-  private static Vector<Text> scores;
+  private static ArrayList<Text> scores;
   private static Vector<Player> players;
   private static Board gameBoard;
   private Options gameOptions;
@@ -29,13 +32,18 @@ public class Game implements Constants {
   Game(Options gameOptions) {
     this.gameOptions = gameOptions;
 
+    Date currentDate = new Date();
+    SimpleDateFormat formatter = new SimpleDateFormat("ddMMyyyy_hh_mm_ss");
+    File.createWriteStream(formatter.format(currentDate) + ".replay");
+    File.saveOptions(gameOptions);
+
     players = new Vector<>();
     players.add(gameOptions.getFirstPlayer());
     players.add(gameOptions.getSecondPlayer());
 
     gameBoard = new Board(gameOptions.getRows(), gameOptions.getColumns());
     currentPlayer = 0;
-    scores = new Vector<>();
+    scores = new ArrayList<>();
     playersNames = new Vector<>();
 
     Scene gameScene = createScene();
@@ -135,6 +143,10 @@ public class Game implements Constants {
     return players.get(currentPlayer);
   }
 
+  public static int getNumberOfTheCurrentPlayer() {
+    return currentPlayer;
+  }
+
   public static void addScoreToPlayer() {
     players.get(currentPlayer).addScore(1);
     scores.get(currentPlayer).setText(Integer.toString(players.get(currentPlayer).getScore()));
@@ -142,5 +154,13 @@ public class Game implements Constants {
 
   public static Vector<Player> getPlayers() {
     return players;
+  }
+
+  public Options getGameOptions() {
+    return gameOptions;
+  }
+
+  public static ArrayList<Text> getScores() {
+    return scores;
   }
 }

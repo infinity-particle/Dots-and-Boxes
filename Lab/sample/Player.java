@@ -2,12 +2,14 @@ package sample;
 
 import javafx.scene.paint.Color;
 
-public class Player {
+import java.io.Serializable;
+
+public class Player implements Serializable {
   private String name;
   private String initials;
   private int score;
-  private PlayerType type;
-  private Color color;
+  transient private PlayerType type;
+  transient private Color color;
 
   Player(String name, PlayerType type, Color color) {
     this.name = name;

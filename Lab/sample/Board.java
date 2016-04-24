@@ -6,6 +6,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 /**
@@ -19,6 +20,7 @@ public class Board extends GridPane implements Constants {
   private int remainingMoves;
   private Pane cornersPane;
   private Pane sidesPane;
+  private ArrayList<Move> moves;
 
   /**
    * @param rows    Number of rows
@@ -36,6 +38,8 @@ public class Board extends GridPane implements Constants {
     sidesPane = new Pane();
     getChildren().add(sidesPane);
     getChildren().add(cornersPane);
+
+    moves = new ArrayList<>();
 
     int coordinateX = 0;
     int coordinateY = 0;
@@ -65,24 +69,39 @@ public class Board extends GridPane implements Constants {
    */
   private void checkForMove() {
     Vector<Corner> clickedCorners = findClickedCorners();
-
     if (clickedCorners.size() == 2) {
+      Move move = new Move();
+
       if (clickedCorners.get(FIRST).isNearbyTo(clickedCorners.get(SECOND))) {
-        Side move = new Side(clickedCorners.get(FIRST).getLocation(),
+        if (moveAlreadyBeen(clickedCorners.get(FIRST), clickedCorners.get(SECOND))) {
+          clickedCorners.forEach(Corner::unclick);
+          return;
+        }
+        Side side = new Side(clickedCorners.get(FIRST).getLocation(),
             clickedCorners.get(SECOND).getLocation());
-        move.setStroke(Game.getCurrentPlayerColor());
+
+        side.setStroke(Game.getCurrentPlayerColor());
         setBoxSides(clickedCorners.get(FIRST), clickedCorners.get(SECOND));
         decreaseRemainingMoves();
-        sidesPane.getChildren().add(move);
+        move.setSide(side);
+        moves.add(move);
+        moves.get(moves.size() - 1).setCurrentPlayer(Game.getNumberOfTheCurrentPlayer());
+        sidesPane.getChildren().add(side);
       }
 
       clickedCorners.forEach(Corner::unclick);
 
       //If the current player does not outlined cell , the next player goes
-      if (!checkOnCircledCells())
+      if (!checkOnCircledCells()) {
+        moves.get(moves.size() - 1).setScores(Game.getScores());
         Game.changePlayer();
+      } else {
+        moves.get(moves.size() - 1).setScores(Game.getScores());
+      }
 
       if (isEnd()) {
+        File.saveMoves(moves);
+        File.closeWriteStream();
         EndGameWindow.display(Game.getPlayers());
         return;
       }
@@ -90,19 +109,30 @@ public class Board extends GridPane implements Constants {
       //If the next player bot , he goes
       if (Game.getCurrentPlayer().getType() == PlayerType.BOT) {
         Bot.move(this);
+        moves.get(moves.size() - 1).setCurrentPlayer(Game.getNumberOfTheCurrentPlayer());
         while (checkOnCircledCells()) {
+          moves.get(moves.size() - 1).setScores(Game.getScores());
           if (isEnd()) {
+            File.saveMoves(moves);
+            File.closeWriteStream();
             EndGameWindow.display(Game.getPlayers());
             return;
           }
+
           Bot.move(this);
+          moves.get(moves.size() - 1).setScores(Game.getScores());
+          moves.get(moves.size() - 1).setCurrentPlayer(Game.getNumberOfTheCurrentPlayer());
         }
+
+
         Game.changePlayer();
+
         if (isEnd()) {
+          File.saveMoves(moves);
+          File.closeWriteStream();
           EndGameWindow.display(Game.getPlayers());
         }
       }
-
     }
   }
 
@@ -164,12 +194,22 @@ public class Board extends GridPane implements Constants {
    * @param cell   The cell in which the label is drawn.
    */
   public void markCell(Player player, Box cell) {
-    Text mark = new Text(player.getInitials());
-    mark.setFill(player.getColor());
-    mark.setFont(Font.font(18));
-    mark.setX(cell.getUpperLeft().getLocation().getX() + DEFAULT_OFFSET / 2);
-    mark.setY(cell.getUpperLeft().getLocation().getY() + DEFAULT_OFFSET / 2);
-    cornersPane.getChildren().add(mark);
+    Text text = new Text(player.getInitials());
+    text.setFill(player.getColor());
+    text.setFont(Font.font(18));
+    text.setX(cell.getUpperLeft().getLocation().getX() + DEFAULT_OFFSET / 2);
+    text.setY(cell.getUpperLeft().getLocation().getY() + DEFAULT_OFFSET / 2);
+
+    Mark mark = new Mark();
+    mark.setX(text.getX());
+    mark.setY(text.getY());
+    mark.setText(text.getText());
+    mark.setFontSize(text.getFont().getSize());
+    mark.setColorOfPlayer(Game.getNumberOfTheCurrentPlayer());
+
+    moves.get(moves.size() - 1).addMark(mark);
+
+    cornersPane.getChildren().add(text);
   }
 
 
@@ -191,15 +231,25 @@ public class Board extends GridPane implements Constants {
 
   public void botGoesFirst() {
     Bot.randomMove(this);
+    moves.get(moves.size() - 1).setScores(Game.getScores());
+    moves.get(moves.size() - 1).setCurrentPlayer(Game.getNumberOfTheCurrentPlayer());
     Game.changePlayer();
   }
 
   public void makeMoveBot(Corner first, Corner second) {
-    Side move = new Side(first.getLocation(), second.getLocation());
-    move.setStroke(Game.getCurrentPlayerColor());
+    Move move = new Move();
+    Side side = new Side(first.getLocation(), second.getLocation());
+    side.setStroke(Game.getCurrentPlayerColor());
     setBoxSides(first, second);
     decreaseRemainingMoves();
-    addSide(move);
+    move.setSide(side);
+    moves.add(move);
+    moves.get(moves.size() - 1).setCurrentPlayer(Game.getNumberOfTheCurrentPlayer());
+    addSide(side);
+  }
+
+  public void addMark(Text mark) {
+    sidesPane.getChildren().add(mark);
   }
 
   /**
@@ -208,9 +258,14 @@ public class Board extends GridPane implements Constants {
   public void botVsBot() {
     while (remainingMoves > 0) {
       Bot.move(this);
-      if (!checkOnCircledCells())
+      if (!checkOnCircledCells()) {
+        moves.get(moves.size() - 1).setScores(Game.getScores());
         Game.changePlayer();
+      }
+      moves.get(moves.size() - 1).setScores(Game.getScores());
     }
+    File.saveMoves(moves);
+    System.out.println(moves.size());
     EndGameWindow.display(Game.getPlayers());
   }
 
@@ -222,5 +277,21 @@ public class Board extends GridPane implements Constants {
       return true;
     else
       return false;
+  }
+
+  private boolean moveAlreadyBeen(Corner first, Corner second) {
+    Point firstCoordinate = first.getLocation();
+    Point secondCoordinate = second.getLocation();
+
+    for (Move move : moves) {
+      Point startCoordinate = move.getMove().getStartCoordinates();
+      Point endCoordinate = move.getMove().getEndCoordinates();
+
+      if (firstCoordinate.equals(startCoordinate) || secondCoordinate.equals(startCoordinate)) {
+        if (firstCoordinate.equals(endCoordinate) || secondCoordinate.equals(endCoordinate))
+          return true;
+      }
+    }
+    return false;
   }
 }
