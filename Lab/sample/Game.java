@@ -1,5 +1,6 @@
 package sample;
 
+import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -21,21 +22,16 @@ import java.util.Vector;
 /**
  * This class controls gameplay.
  */
-public class Game implements Constants {
-  private static Vector<Text> playersNames;
-  private static ArrayList<Text> scores;
+public class Game extends Thread implements Constants {
+  private Vector<Text> playersNames;
+  private ArrayList<Text> scores;
   private static Vector<Player> players;
-  private static Board gameBoard;
+  private Board gameBoard;
   private Options gameOptions;
   private static int currentPlayer;
 
   Game(Options gameOptions) {
     this.gameOptions = gameOptions;
-
-    Date currentDate = new Date();
-    SimpleDateFormat formatter = new SimpleDateFormat("ddMMyyyy_hh_mm_ss");
-    File.createWriteStream(formatter.format(currentDate) + ".replay");
-    File.saveOptions(gameOptions);
 
     players = new Vector<>();
     players.add(gameOptions.getFirstPlayer());
@@ -49,13 +45,53 @@ public class Game implements Constants {
     Scene gameScene = createScene();
 
     Main.setScene(gameScene);
+  }
 
-    if (players.get(FIRST).getType() == PlayerType.BOT
-        && players.get(SECOND).getType() == PlayerType.BOT) {
-      gameBoard.botVsBot();
-    } else {
-      if (players.get(FIRST).getType() == PlayerType.BOT) {
-        gameBoard.botGoesFirst();
+  public void run() {
+    while (true) {
+      if (getCurrentPlayer().getType() == PlayerType.BOT) {
+        Thread botThread = new Thread(new Runnable() {
+          @Override public void run() {
+            synchronized (this) {
+              try {
+                Thread.sleep(100);
+              } catch (InterruptedException e) {
+                e.printStackTrace();
+              }
+              Bot bot = new Bot();
+              bot.move(gameBoard);
+              notify();
+            }
+          }
+        });
+        botThread.start();
+        synchronized (botThread) {
+          try {
+            botThread.wait();
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+        }
+      } else {
+        synchronized (gameBoard) {
+          try {
+            gameBoard.wait();
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+      int score = gameBoard.checkOnCircledCells();
+      if (score == 0) {
+        changePlayer();
+      } else {
+        addScoreToPlayer(score);
+      }
+      gameBoard.getMoves().get(gameBoard.getMoves().size() - 1).setScores(scores);
+
+      if (gameBoard.isEnd()) {
+        saveReplay();
+        Platform.runLater(() -> EndGameWindow.display(players));
       }
     }
   }
@@ -63,7 +99,7 @@ public class Game implements Constants {
   /**
    * Changes the current player at the next.
    */
-  public static void changePlayer() {
+  public void changePlayer() {
     playersNames.get(currentPlayer).setUnderline(false);
     currentPlayer++;
     if (currentPlayer >= players.size())
@@ -101,7 +137,6 @@ public class Game implements Constants {
     });
     returnToMainMenu.setPrefSize(150, 30);
     GridPane.setConstraints(returnToMainMenu, 1, 1);
-    returnToMainMenu.setAlignment(Pos.CENTER);
     GridPane.setHalignment(returnToMainMenu, HPos.CENTER);
 
     root.getChildren().addAll(firstPlayerScoreLayout, gameBoardLayout, secondPlayerScoreLayout);
@@ -147,20 +182,18 @@ public class Game implements Constants {
     return currentPlayer;
   }
 
-  public static void addScoreToPlayer() {
-    players.get(currentPlayer).addScore(1);
+  public void addScoreToPlayer(int score) {
+    players.get(currentPlayer).addScore(score);
     scores.get(currentPlayer).setText(Integer.toString(players.get(currentPlayer).getScore()));
   }
 
-  public static Vector<Player> getPlayers() {
-    return players;
+  public void saveReplay() {
+    Date currentDate = new Date();
+    SimpleDateFormat formatter = new SimpleDateFormat("ddMMyyyy_hh_mm_ss");
+    File replay = new File(formatter.format(currentDate) + ".replay");
+    replay.createWriteStream();
+    replay.saveOptions(gameOptions);
+    replay.saveMoves(gameBoard.getMoves());
   }
 
-  public Options getGameOptions() {
-    return gameOptions;
-  }
-
-  public static ArrayList<Text> getScores() {
-    return scores;
-  }
 }

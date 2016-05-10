@@ -28,15 +28,16 @@ public class Replay extends Stage implements Constants {
     gameOptions = new Options();
     scores = new ArrayList<>();
 
-    File.createReadStream(file.getName());
-    gameOptions = File.loadOptions();
+    File replay = new File(file.getName());
+    replay.createReadStream();
+    gameOptions = replay.loadOptions();
 
     gameBoard = new Board(gameOptions.getRows(), gameOptions.getColumns());
     gameBoard.setDisable(true);
 
-    moves = File.loadMoves();
+    moves = replay.loadMoves();
 
-    File.closeReadStream();
+    replay.closeReadStream();
 
     System.out.println(moves.size());
 
@@ -77,6 +78,7 @@ public class Replay extends Stage implements Constants {
     Button exitButton = new Button("Exit");
     GridPane.setConstraints(exitButton, 2, 1);
     GridPane.setHalignment(exitButton, HPos.CENTER);
+    GridPane.setMargin(exitButton, new Insets(DEFAULT_OFFSET / 2));
     exitButton.setOnMouseClicked(event -> {
       this.close();
     });
@@ -117,7 +119,7 @@ public class Replay extends Stage implements Constants {
     }
   };
 
-  private void play() {
+  public void play() {
     if (counter >= moves.size()) {
       at.stop();
       return;
@@ -155,6 +157,7 @@ public class Replay extends Stage implements Constants {
       scores.get(SECOND).setText(Integer.toString(moves.get(counter).getSecondPlayerScore(), 10));
 
     counter++;
+
   }
 }
 

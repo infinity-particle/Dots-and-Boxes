@@ -4,12 +4,17 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class File {
-  private static FileOutputStream writeFile;
-  private static FileInputStream readFile;
-  private static ObjectOutputStream writeStream;
-  private static ObjectInputStream readStream;
+  private FileOutputStream writeFile;
+  private FileInputStream readFile;
+  private ObjectOutputStream writeStream;
+  private ObjectInputStream readStream;
+  private String fileName;
 
-  public static void createWriteStream(String fileName) {
+  File(String fileName) {
+    this.fileName = fileName;
+  }
+
+  public void createWriteStream() {
     try {
       writeFile = new FileOutputStream(fileName);
       writeStream = new ObjectOutputStream(writeFile);
@@ -18,7 +23,7 @@ public class File {
     }
   }
 
-  public static void saveMoves(ArrayList<Move> toSave) {
+  public void saveMoves(ArrayList<Move> toSave) {
     try {
       writeStream.writeObject(toSave);
       writeStream.flush();
@@ -27,7 +32,7 @@ public class File {
     }
   }
 
-  public static void createReadStream(String fileName) {
+  public void createReadStream() {
     try {
       readFile = new FileInputStream(fileName);
       readStream = new ObjectInputStream(readFile);
@@ -36,7 +41,7 @@ public class File {
     }
   }
 
-  public static Options loadOptions() {
+  public Options loadOptions() {
     Options gameOptions = new Options();
     try {
       gameOptions = (Options) readStream.readObject();
@@ -47,7 +52,7 @@ public class File {
     return gameOptions;
   }
 
-  public static ArrayList<Move> loadMoves() {
+  public ArrayList<Move> loadMoves() {
     ArrayList<Move> moves = new ArrayList<>();
     try {
       moves = (ArrayList<Move>) readStream.readObject();
@@ -58,7 +63,7 @@ public class File {
     return moves;
   }
 
-  public static void saveOptions(Options toSave) {
+  public void saveOptions(Options toSave) {
     try {
       writeStream.writeObject(toSave);
       writeStream.flush();
@@ -68,7 +73,7 @@ public class File {
 
   }
 
-  public static void closeWriteStream() {
+  public void closeWriteStream() {
     try {
       writeStream.close();
     } catch (IOException e) {
@@ -76,7 +81,7 @@ public class File {
     }
   }
 
-  public static void closeReadStream() {
+  public void closeReadStream() {
     try {
       readStream.close();
     } catch (IOException e) {

@@ -19,8 +19,10 @@ public class MainMenu extends Pane implements Constants {
 
     newGameButton.setOnMouseReleased(event -> {
       Options gameOptions = NewGameWindow.display();
-      if (gameOptions != null)
-        new Game(gameOptions);
+      if (gameOptions != null) {
+        Game newGame = new Game(gameOptions);
+        newGame.start();
+      }
     });
     replayButton.setOnMouseClicked(event -> {
       FileChooser replayFileChooser = new FileChooser();

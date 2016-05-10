@@ -3,10 +3,12 @@ package sample;
 import java.util.Random;
 
 public class Bot implements Constants {
-  /**
-   * Bot looking for a cell with one uncovered side , if this is not doing a random move.
-   */
-  public static void move(Board gameBoard) {
+
+  Bot() {
+
+  }
+
+  public void move(Board gameBoard) {
     Box[][] boxes = gameBoard.getBoxes();
 
     for (int i = 0; i < gameBoard.getRows() - 1; i++)
@@ -29,14 +31,13 @@ public class Bot implements Constants {
             return;
           }
         }
-
     randomMove(gameBoard);
   }
 
   /**
    * Bot makes random move.
    **/
-  public static void randomMove(Board gameBoard) {
+  public void randomMove(Board gameBoard) {
     Box[][] boxes = gameBoard.getBoxes();
     Random randomValue = new Random();
     int i, j;
@@ -53,6 +54,7 @@ public class Bot implements Constants {
         case TOP: {
           if (!boxes[i][j].isTop()) {
             gameBoard.makeMoveBot(boxes[i][j].getUpperLeft(), boxes[i][j].getUpperRight());
+            return;
           } else {
             side = WRONG_SIDE;
           }
@@ -61,6 +63,7 @@ public class Bot implements Constants {
         case RIGHT: {
           if (!boxes[i][j].isRight()) {
             gameBoard.makeMoveBot(boxes[i][j].getUpperRight(), boxes[i][j].getLowerRight());
+            return;
           } else {
             side = WRONG_SIDE;
           }
@@ -69,6 +72,7 @@ public class Bot implements Constants {
         case BOTTOM: {
           if (!boxes[i][j].isBottom()) {
             gameBoard.makeMoveBot(boxes[i][j].getLowerRight(), boxes[i][j].getLowerLeft());
+            return;
           } else {
             side = WRONG_SIDE;
           }
@@ -77,6 +81,7 @@ public class Bot implements Constants {
         case LEFT: {
           if (!boxes[i][j].isLeft()) {
             gameBoard.makeMoveBot(boxes[i][j].getLowerLeft(), boxes[i][j].getUpperLeft());
+            return;
           } else {
             side = WRONG_SIDE;
           }

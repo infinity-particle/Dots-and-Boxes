@@ -1,5 +1,6 @@
 package sample;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
@@ -77,62 +78,21 @@ public class Board extends GridPane implements Constants {
           clickedCorners.forEach(Corner::unclick);
           return;
         }
-        Side side = new Side(clickedCorners.get(FIRST).getLocation(),
-            clickedCorners.get(SECOND).getLocation());
-
-        side.setStroke(Game.getCurrentPlayerColor());
-        setBoxSides(clickedCorners.get(FIRST), clickedCorners.get(SECOND));
-        decreaseRemainingMoves();
-        move.setSide(side);
-        moves.add(move);
-        moves.get(moves.size() - 1).setCurrentPlayer(Game.getNumberOfTheCurrentPlayer());
-        sidesPane.getChildren().add(side);
+        synchronized (this) {
+          Side side = new Side(clickedCorners.get(FIRST).getLocation(),
+              clickedCorners.get(SECOND).getLocation());
+          side.setStroke(Game.getCurrentPlayerColor());
+          setBoxSides(clickedCorners.get(FIRST), clickedCorners.get(SECOND));
+          decreaseRemainingMoves();
+          move.setSide(side);
+          moves.add(move);
+          moves.get(moves.size() - 1).setCurrentPlayer(Game.getNumberOfTheCurrentPlayer());
+          Platform.runLater(() -> sidesPane.getChildren().add(side));
+          notify();
+        }
       }
 
       clickedCorners.forEach(Corner::unclick);
-
-      //If the current player does not outlined cell , the next player goes
-      if (!checkOnCircledCells()) {
-        moves.get(moves.size() - 1).setScores(Game.getScores());
-        Game.changePlayer();
-      } else {
-        moves.get(moves.size() - 1).setScores(Game.getScores());
-      }
-
-      if (isEnd()) {
-        File.saveMoves(moves);
-        File.closeWriteStream();
-        EndGameWindow.display(Game.getPlayers());
-        return;
-      }
-
-      //If the next player bot , he goes
-      if (Game.getCurrentPlayer().getType() == PlayerType.BOT) {
-        Bot.move(this);
-        moves.get(moves.size() - 1).setCurrentPlayer(Game.getNumberOfTheCurrentPlayer());
-        while (checkOnCircledCells()) {
-          moves.get(moves.size() - 1).setScores(Game.getScores());
-          if (isEnd()) {
-            File.saveMoves(moves);
-            File.closeWriteStream();
-            EndGameWindow.display(Game.getPlayers());
-            return;
-          }
-
-          Bot.move(this);
-          moves.get(moves.size() - 1).setScores(Game.getScores());
-          moves.get(moves.size() - 1).setCurrentPlayer(Game.getNumberOfTheCurrentPlayer());
-        }
-
-
-        Game.changePlayer();
-
-        if (isEnd()) {
-          File.saveMoves(moves);
-          File.closeWriteStream();
-          EndGameWindow.display(Game.getPlayers());
-        }
-      }
     }
   }
 
@@ -173,18 +133,16 @@ public class Board extends GridPane implements Constants {
    *
    * @return true if has at least one cell is circled,and false if not.
    */
-  public boolean checkOnCircledCells() {
-    boolean haveCircledCells = false;
-
+  public int checkOnCircledCells() {
+    int score = 0;
     for (int i = 0; i < rows - 1; i++)
       for (int j = 0; j < columns - 1; j++)
         if (boxes[i][j].isOutlined() && !boxes[i][j].isOccupied()) {
-          Game.addScoreToPlayer();
+          score++;
           boxes[i][j].setOwner(Game.getCurrentPlayer().getName());
           markCell(Game.getCurrentPlayer(), boxes[i][j]);
-          haveCircledCells = true;
         }
-    return haveCircledCells;
+    return score;
   }
 
   /**
@@ -209,9 +167,8 @@ public class Board extends GridPane implements Constants {
 
     moves.get(moves.size() - 1).addMark(mark);
 
-    cornersPane.getChildren().add(text);
+    Platform.runLater(() -> cornersPane.getChildren().add(text));
   }
-
 
   public void decreaseRemainingMoves() {
     remainingMoves--;
@@ -229,13 +186,6 @@ public class Board extends GridPane implements Constants {
     sidesPane.getChildren().add(move);
   }
 
-  public void botGoesFirst() {
-    Bot.randomMove(this);
-    moves.get(moves.size() - 1).setScores(Game.getScores());
-    moves.get(moves.size() - 1).setCurrentPlayer(Game.getNumberOfTheCurrentPlayer());
-    Game.changePlayer();
-  }
-
   public void makeMoveBot(Corner first, Corner second) {
     Move move = new Move();
     Side side = new Side(first.getLocation(), second.getLocation());
@@ -245,38 +195,22 @@ public class Board extends GridPane implements Constants {
     move.setSide(side);
     moves.add(move);
     moves.get(moves.size() - 1).setCurrentPlayer(Game.getNumberOfTheCurrentPlayer());
-    addSide(side);
+    Platform.runLater(() -> addSide(side));
   }
 
   public void addMark(Text mark) {
     sidesPane.getChildren().add(mark);
   }
 
-  /**
-   * If both players bot.
-   */
-  public void botVsBot() {
-    while (remainingMoves > 0) {
-      Bot.move(this);
-      if (!checkOnCircledCells()) {
-        moves.get(moves.size() - 1).setScores(Game.getScores());
-        Game.changePlayer();
-      }
-      moves.get(moves.size() - 1).setScores(Game.getScores());
-    }
-    File.saveMoves(moves);
-    System.out.println(moves.size());
-    EndGameWindow.display(Game.getPlayers());
+  public ArrayList<Move> getMoves() {
+    return moves;
   }
 
   /**
    * @return true, if no more moves,and false, if moves left.
    */
   public boolean isEnd() {
-    if (remainingMoves == 0)
-      return true;
-    else
-      return false;
+    return remainingMoves == 0;
   }
 
   private boolean moveAlreadyBeen(Corner first, Corner second) {

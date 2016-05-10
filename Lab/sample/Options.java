@@ -1,6 +1,7 @@
 package sample;
 
 import java.io.Serializable;
+import java.util.Vector;
 
 /**
  * This class implements the game options.
@@ -16,6 +17,13 @@ public class Options implements Serializable {
     secondPlayer = null;
     rows = 0;
     columns = 0;
+  }
+
+  Options(int rows, int columns, Vector<Player> players) {
+    this.rows = rows;
+    this.columns = columns;
+    this.firstPlayer = players.get(0);
+    this.secondPlayer = players.get(1);
   }
 
   public Player getFirstPlayer() {
