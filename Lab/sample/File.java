@@ -63,6 +63,16 @@ public class File {
     return moves;
   }
 
+  public int loadScore() {
+    int score = 0;
+    try {
+      score = readStream.readInt();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return score;
+  }
+
   public void saveOptions(Options toSave) {
     try {
       writeStream.writeObject(toSave);
@@ -70,7 +80,15 @@ public class File {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
 
+  public void saveScore(int score) {
+    try {
+      writeStream.writeInt(score);
+      writeStream.flush();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   public void closeWriteStream() {

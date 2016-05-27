@@ -14,10 +14,10 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 public class EndGameWindow implements Constants {
-  public static void display(Vector<Player> players) {
+  public static void display(ArrayList<Player> players) {
     Stage window = new Stage();
     Pane root = new Pane();
 

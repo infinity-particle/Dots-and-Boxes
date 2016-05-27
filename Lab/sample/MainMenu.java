@@ -1,11 +1,16 @@
 package sample;
 
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainMenu extends Pane implements Constants {
   private static Scene mainMenuScene;
@@ -15,13 +20,25 @@ public class MainMenu extends Pane implements Constants {
 
     MenuItem newGameButton = new MenuItem("NEW GAME");
     MenuItem replayButton = new MenuItem("REPLAY");
+    MenuItem sortButton = new MenuItem("SORT");
     MenuItem exitButton = new MenuItem("EXIT");
 
     newGameButton.setOnMouseReleased(event -> {
       Options gameOptions = NewGameWindow.display();
       if (gameOptions != null) {
-        Game newGame = new Game(gameOptions);
-        newGame.start();
+        new Thread(() -> {
+          Game newGame = new Game(gameOptions);
+          newGame.start();
+          synchronized (newGame) {
+            try {
+              newGame.wait();
+            } catch (InterruptedException e) {
+              e.printStackTrace();
+            }
+            Platform.runLater(() -> EndGameWindow.display(newGame.getPlayers()));
+          }
+        }).start();
+
       }
     });
     replayButton.setOnMouseClicked(event -> {
@@ -34,9 +51,77 @@ public class MainMenu extends Pane implements Constants {
         new Replay(file);
       }
     });
+    sortButton.setOnMouseClicked(event -> {
+      FileChooser filesForSort = new FileChooser();
+
+      FileChooser.ExtensionFilter filter =
+          new FileChooser.ExtensionFilter("Replay files (*.replay)", "*.replay");
+      filesForSort.getExtensionFilters().add(filter);
+
+      List<java.io.File> files = filesForSort.showOpenMultipleDialog(Main.getPrimaryStage());
+      if (files != null) {
+        switch (SortChooser.display()) {
+          case "Java": {
+            long startTime, elapsedTime;
+
+            startTime = System.currentTimeMillis();
+            List<File> sortedFiles = sort(files);
+            elapsedTime = (System.currentTimeMillis() - startTime) / 1000;
+
+            System.out.println("********** JAVA(" + sortedFiles.size() + ") **********\n");
+            System.out.println("Time: " + elapsedTime + " s");
+            System.out.println("Best game: " + sortedFiles.get(FIRST).getAbsolutePath());
+            System.out.println(
+                "Worst game: " + sortedFiles.get(sortedFiles.size() - 1).getAbsolutePath());
+            System.out.println("\n******************************\n");
+
+            switch (SortOver.display()) {
+              case "Best": {
+                new Replay(sortedFiles.get(FIRST));
+              }
+              break;
+              case "Worst": {
+                new Replay(sortedFiles.get(sortedFiles.size() - 1));
+              }
+              break;
+            }
+          }
+          break;
+
+          case "Scala": {
+            long startTime, elapsedTime;
+            java.io.File[] filesArray = new java.io.File[files.size()];
+
+            files.toArray(filesArray);
+            startTime = System.currentTimeMillis();
+            filesArray = ScalaSort.scalaSort(filesArray);
+            elapsedTime = (System.currentTimeMillis() - startTime) / 1000;
+
+            System.out.println("********** SCALA(" + filesArray.length + ") **********\n");
+            System.out.println("Time: " + elapsedTime + " s");
+            System.out.println("Best game: " + filesArray[FIRST].getAbsolutePath());
+            System.out
+                .println("Worst game: " + filesArray[filesArray.length - 1].getAbsolutePath());
+            System.out.println("\n******************************\n");
+
+            switch (SortOver.display()) {
+              case "Best": {
+                new Replay(filesArray[FIRST]);
+              }
+              break;
+              case "Worst": {
+                new Replay(filesArray[filesArray.length - 1]);
+              }
+              break;
+            }
+          }
+          break;
+        }
+      }
+    });
     exitButton.setOnMouseClicked(event -> System.exit(0));
 
-    MenuBox menu = new MenuBox("DOTS & BOXES", newGameButton, replayButton, exitButton);
+    MenuBox menu = new MenuBox("DOTS & BOXES", newGameButton, replayButton, sortButton, exitButton);
 
     getChildren().addAll(menu);
 
@@ -48,5 +133,28 @@ public class MainMenu extends Pane implements Constants {
 
   public static Scene getMainMenuScene() {
     return mainMenuScene;
+  }
+
+  public List<File> sort(List<File> files) {
+    List<File> sortedFiles = new ArrayList<>(files);
+    sortedFiles.sort((o1, o2) -> {
+      sample.File firstFile = new sample.File(o1.getAbsolutePath());
+      sample.File secondFile = new sample.File(o2.getAbsolutePath());
+
+      firstFile.createReadStream();
+      int firstScore = firstFile.loadScore();
+      firstFile.closeReadStream();
+
+      secondFile.createReadStream();
+      int secondScore = secondFile.loadScore();
+      secondFile.closeReadStream();
+
+      if (firstScore > secondScore)
+        return -1;
+      if (firstScore < secondScore)
+        return 1;
+      return 0;
+    });
+    return sortedFiles;
   }
 }

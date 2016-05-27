@@ -170,6 +170,7 @@ public class Board extends GridPane implements Constants {
     Platform.runLater(() -> cornersPane.getChildren().add(text));
   }
 
+
   public void decreaseRemainingMoves() {
     remainingMoves--;
   }

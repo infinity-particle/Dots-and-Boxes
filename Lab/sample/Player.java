@@ -35,6 +35,10 @@ public class Player implements Serializable {
     return color;
   }
 
+  public void setScore(int score) {
+    this.score = score;
+  }
+
   public void addScore(int points) {
     score += points;
   }

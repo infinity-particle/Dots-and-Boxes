@@ -28,8 +28,11 @@ public class Replay extends Stage implements Constants {
     gameOptions = new Options();
     scores = new ArrayList<>();
 
-    File replay = new File(file.getName());
+    File replay = new File(file.getPath());
     replay.createReadStream();
+    int firstPlayerScore = replay.loadScore();
+    int secondPlayerScore = replay.loadScore();
+    System.out.println(firstPlayerScore + " : " + secondPlayerScore);
     gameOptions = replay.loadOptions();
 
     gameBoard = new Board(gameOptions.getRows(), gameOptions.getColumns());
@@ -102,7 +105,8 @@ public class Replay extends Stage implements Constants {
     else
       playerName.setFill(DEFAULT_COLOR_FOR_SECOND_PLAYER);
 
-    Text playerScore = new Text(Integer.toString(player.getScore(), 10));
+    // Text playerScore = new Text(Integer.toString(player.getScore(), 10));
+    Text playerScore = new Text("0");
     playerScore.setFill(Color.WHITE);
     playerScore.setFont(Font.font(20));
 
