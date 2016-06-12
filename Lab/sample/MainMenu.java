@@ -21,6 +21,8 @@ public class MainMenu extends Pane implements Constants {
     MenuItem newGameButton = new MenuItem("NEW GAME");
     MenuItem replayButton = new MenuItem("REPLAY");
     MenuItem sortButton = new MenuItem("SORT");
+    MenuItem statisticButton = new MenuItem("STATISTICS");
+    MenuItem pseudoButton = new MenuItem("PSEUDO");
     MenuItem exitButton = new MenuItem("EXIT");
 
     newGameButton.setOnMouseReleased(event -> {
@@ -41,6 +43,7 @@ public class MainMenu extends Pane implements Constants {
 
       }
     });
+
     replayButton.setOnMouseClicked(event -> {
       FileChooser replayFileChooser = new FileChooser();
       FileChooser.ExtensionFilter filter =
@@ -51,6 +54,48 @@ public class MainMenu extends Pane implements Constants {
         new Replay(file);
       }
     });
+
+    statisticButton.setOnMouseClicked(event -> {
+      FileChooser filesForStatistics = new FileChooser();
+
+      FileChooser.ExtensionFilter filter =
+          new FileChooser.ExtensionFilter("Replay files (*.replay)", "*.replay");
+
+      filesForStatistics.getExtensionFilters().add(filter);
+
+      List<java.io.File> files = filesForStatistics.showOpenMultipleDialog(Main.getPrimaryStage());
+      if (files != null) {
+        int[] firstPlayerScores = new int[files.size()];
+        int[] secondPlayerScores = new int[files.size()];
+        int i = 0;
+        for (java.io.File file : files) {
+          sample.File savedReplay = new sample.File(file.getAbsolutePath());
+          savedReplay.createReadStream();
+          firstPlayerScores[i] = savedReplay.loadScore();
+          secondPlayerScores[i] = savedReplay.loadScore();
+          savedReplay.closeReadStream();
+          i++;
+        }
+        double firstPlayerWinsPercent =
+            ScalaStatistics.winsPercent(firstPlayerScores, secondPlayerScores);
+        double firstPlayerAverageScore = ScalaStatistics.averageScore(firstPlayerScores);
+        int secondPlayerAverageScore = ScalaStatistics.bestScore(secondPlayerScores);
+        StatisticsWindow
+            .display(firstPlayerWinsPercent, firstPlayerAverageScore, secondPlayerAverageScore);
+      }
+    });
+
+    pseudoButton.setOnMouseClicked(event -> {
+      FileChooser replayFileChooser = new FileChooser();
+      FileChooser.ExtensionFilter filter =
+          new FileChooser.ExtensionFilter("Replay files (*.replay)", "*.replay");
+      replayFileChooser.getExtensionFilters().add(filter);
+      java.io.File file = replayFileChooser.showOpenDialog(Main.getPrimaryStage());
+      if (file != null) {
+        ScalaPseudoCode.pseudoCode(file.getAbsolutePath());
+      }
+    });
+
     sortButton.setOnMouseClicked(event -> {
       FileChooser filesForSort = new FileChooser();
 
@@ -121,7 +166,9 @@ public class MainMenu extends Pane implements Constants {
     });
     exitButton.setOnMouseClicked(event -> System.exit(0));
 
-    MenuBox menu = new MenuBox("DOTS & BOXES", newGameButton, replayButton, sortButton, exitButton);
+    MenuBox menu =
+        new MenuBox("DOTS & BOXES", newGameButton, replayButton, sortButton, statisticButton,
+            pseudoButton, exitButton);
 
     getChildren().addAll(menu);
 
