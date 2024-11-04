@@ -45,7 +45,7 @@ public class EndGameWindow implements Constants {
     Button okButton = new Button("OK");
     okButton.setPrefSize(50, 30);
     okButton.setOnMouseClicked(event -> {
-      Main.setScene(MainMenu.getMainMenuScene());
+      App.setScene(MainMenu.getMainMenuScene());
       window.close();
     });
 

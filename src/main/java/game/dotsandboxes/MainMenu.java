@@ -49,7 +49,7 @@ public class MainMenu extends Pane implements Constants {
       FileChooser.ExtensionFilter filter =
           new FileChooser.ExtensionFilter("Replay files (*.replay)", "*.replay");
       replayFileChooser.getExtensionFilters().add(filter);
-      java.io.File file = replayFileChooser.showOpenDialog(Main.getPrimaryStage());
+      java.io.File file = replayFileChooser.showOpenDialog(App.getPrimaryStage());
       if (file != null) {
         new Replay(file);
       }
@@ -63,13 +63,13 @@ public class MainMenu extends Pane implements Constants {
 
       filesForStatistics.getExtensionFilters().add(filter);
 
-      List<java.io.File> files = filesForStatistics.showOpenMultipleDialog(Main.getPrimaryStage());
+      List<java.io.File> files = filesForStatistics.showOpenMultipleDialog(App.getPrimaryStage());
       if (files != null) {
         int[] firstPlayerScores = new int[files.size()];
         int[] secondPlayerScores = new int[files.size()];
         int i = 0;
         for (java.io.File file : files) {
-          sample.File savedReplay = new sample.File(file.getAbsolutePath());
+          game.dotsandboxes.File savedReplay = new game.dotsandboxes.File(file.getAbsolutePath());
           savedReplay.createReadStream();
           firstPlayerScores[i] = savedReplay.loadScore();
           secondPlayerScores[i] = savedReplay.loadScore();
@@ -77,7 +77,7 @@ public class MainMenu extends Pane implements Constants {
           i++;
         }
         double firstPlayerWinsPercent =
-            ScalaStatistics.winsPercent(firstPlayerScores, secondPlayerScores);
+        ScalaStatistics.winsPercent(firstPlayerScores, secondPlayerScores);
         double firstPlayerAverageScore = ScalaStatistics.averageScore(firstPlayerScores);
         int secondPlayerAverageScore = ScalaStatistics.bestScore(secondPlayerScores);
         StatisticsWindow
@@ -90,7 +90,7 @@ public class MainMenu extends Pane implements Constants {
       FileChooser.ExtensionFilter filter =
           new FileChooser.ExtensionFilter("Replay files (*.replay)", "*.replay");
       replayFileChooser.getExtensionFilters().add(filter);
-      java.io.File file = replayFileChooser.showOpenDialog(Main.getPrimaryStage());
+      java.io.File file = replayFileChooser.showOpenDialog(App.getPrimaryStage());
       if (file != null) {
         ScalaPseudoCode.pseudoCode(file.getAbsolutePath());
       }
@@ -103,7 +103,7 @@ public class MainMenu extends Pane implements Constants {
           new FileChooser.ExtensionFilter("Replay files (*.replay)", "*.replay");
       filesForSort.getExtensionFilters().add(filter);
 
-      List<java.io.File> files = filesForSort.showOpenMultipleDialog(Main.getPrimaryStage());
+      List<java.io.File> files = filesForSort.showOpenMultipleDialog(App.getPrimaryStage());
       if (files != null) {
         switch (SortChooser.display()) {
           case "Java": {
@@ -185,8 +185,8 @@ public class MainMenu extends Pane implements Constants {
   public List<File> sort(List<File> files) {
     List<File> sortedFiles = new ArrayList<>(files);
     sortedFiles.sort((o1, o2) -> {
-      sample.File firstFile = new sample.File(o1.getAbsolutePath());
-      sample.File secondFile = new sample.File(o2.getAbsolutePath());
+      game.dotsandboxes.File firstFile = new game.dotsandboxes.File(o1.getAbsolutePath());
+      game.dotsandboxes.File secondFile = new game.dotsandboxes.File(o2.getAbsolutePath());
 
       firstFile.createReadStream();
       int firstScore = firstFile.loadScore();

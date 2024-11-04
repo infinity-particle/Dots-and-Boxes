@@ -43,7 +43,7 @@ public class Game extends Thread implements Constants {
 
     Scene gameScene = createScene();
 
-    Platform.runLater(() -> Main.setScene(gameScene));
+    Platform.runLater(() -> App.setScene(gameScene));
   }
 
   public void run() {
@@ -135,7 +135,7 @@ public class Game extends Thread implements Constants {
 
     Button returnToMainMenu = new Button("Main menu");
     returnToMainMenu.setOnMouseClicked(event -> {
-      Main.setScene(MainMenu.getMainMenuScene());
+      App.setScene(MainMenu.getMainMenuScene());
     });
     returnToMainMenu.setPrefSize(150, 30);
     GridPane.setConstraints(returnToMainMenu, 1, 1);

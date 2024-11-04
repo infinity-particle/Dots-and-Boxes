@@ -32,8 +32,8 @@ object ScalaSort {
   }
 
   def compare(first: java.io.File, second: java.io.File): Int = {
-    val firstFile = new sample.File(first.getAbsolutePath)
-    val secondFile = new sample.File(second.getAbsolutePath)
+    val firstFile = new game.dotsandboxes.File(first.getAbsolutePath)
+    val secondFile = new game.dotsandboxes.File(second.getAbsolutePath)
 
     firstFile.createReadStream()
     val firstScore = firstFile.loadScore()

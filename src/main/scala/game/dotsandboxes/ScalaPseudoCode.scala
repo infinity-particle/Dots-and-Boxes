@@ -10,7 +10,7 @@ object ScalaPseudoCode {
     val secondPlayer = "Second player "
     val output = new PrintWriter(new java.io.File("output.txt"))
 
-    val file = new sample.File(fileName)
+    val file = new game.dotsandboxes.File(fileName)
     file.createReadStream()
     val firstPlayerScore = file.loadScore()
     val secondPlayerScore = file.loadScore()
